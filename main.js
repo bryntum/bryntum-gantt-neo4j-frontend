@@ -1,37 +1,53 @@
-import { Gantt } from "@bryntum/gantt";
+import { Gantt, AssignmentField, ProjectModel } from "@bryntum/gantt";
 import "./style.css";
+
+const project = new ProjectModel({
+  autoLoad: true,
+  autoSync: true,
+  transport: {
+    load: {
+      url: "load",
+    },
+    sync: {
+      url: "sync",
+    },
+  },
+});
 
 const gantt = new Gantt({
   appendTo: "app",
-  startDate: new Date(2022, 0, 1),
-  endDate: new Date(2022, 0, 10),
-  columns: [{ type: "name", width: 160 }],
-  project: {
-    // Automatically introduces a `startnoearlier` constraint for tasks that (a) have no predecessors,
-    // (b) do not use constraints and (c) aren't `manuallyScheduled`
-    autoSetConstraints: true,
-    tasksData: [
-      {
-        id: 1,
-        name: "Write docs",
-        expanded: true,
-        children: [
-          {
-            id: 2,
-            name: "Proof-read docs",
-            startDate: "2022-01-02",
-            endDate: "2022-01-09",
+  resourceImageFolderPath: "./users/",
+  columns: [
+    { type: "name", width: 250 },
+    {
+      type: "resourceassignment",
+      width: 250,
+      showAvatars: true,
+      editor: {
+        type: AssignmentField.type,
+        picker: {
+          height: 350,
+          width: 450,
+          features: {
+            filterBar: true,
+            group: "resource.city",
+            headerMenu: false,
+            cellMenu: false,
           },
-          {
-            id: 3,
-            name: "Release docs",
-            startDate: "2022-01-09",
-            endDate: "2022-01-10",
-          },
-        ],
+          // The extra columns are concatenated onto the base column set.
+          columns: [
+            {
+              text: "Calendar",
+              // Read a nested property (name) from the resource calendar
+              field: "resource.calendar.name",
+              filterable: false,
+              editor: false,
+              width: 85,
+            },
+          ],
+        },
       },
-    ],
-
-    dependenciesData: [{ fromTask: 2, toTask: 3 }],
-  },
+    },
+  ],
+  project: project,
 });
